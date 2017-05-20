@@ -1,0 +1,276 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>DJ Wasabi ディージェー山葵</title>
+
+<!-- for CreateJS and ZIMjs http://zimjs.com - free to modify - Dan Zen 2016 -->
+<!-- see http://zimjs.com/code/frame.html for more templates and meta tags -->
+
+<!-- as of ZIM 4.3.0 load createjs namespace first -->
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+<script>var zon = true; // true for comments from zim code</script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_5.js"></script>
+<!-- use zimjs.com/code/distill for minified individual functions! -->
+
+<style>
+	body {margin:0px; padding:0px; background-color:#333;}
+</style>
+
+<script>
+
+// SCALING OPTIONS
+// scaling can have values as follows with full being the default
+// "fit"		sets canvas and stage to dimensions and scales to fit inside window size
+// "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+// "full"		sets stage to window size with no scaling
+// "tagID"		add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+var scaling = "fit"; // fit scales to fit the browser window while keeping the aspect ratio
+var width = 1920; // can go higher...
+var height = 1080;
+var color = "#333";
+var frame = new zim.Frame(scaling, width, height, color); // see docs for more options and info
+frame.on("ready", function() {
+	zog("ready from ZIM Frame");
+
+	var stage = frame.stage;
+	var stageW = frame.width;
+	var stageH = frame.height;
+    
+    frame.loadAssets(["snare.wav", "vocal.mp3", "bite.wav", "bite2.wav", "bite3.wav", "bite4.wav", "laser.wav", "snap.wav", "pssk.wav", "whip.wav", "scratch.wav", "hey.wav", "screw.png", "led.png"], "_assets/")
+    frame.on("complete", function() {
+        
+        //////// SET UP ////////        
+        var boardBack = new zim.Rectangle({
+            width: 1000,
+            height: 1000,
+            fill: "#FF9800",
+            corner: 24,
+            stroke: "#F57C00",
+            strokeSize: 8
+        });
+        boardBack.center(stage);
+        
+        var screw1 = frame.asset("screw.png");
+        stage.addChild(screw1);
+        screw1.x = 475;
+        screw1.y = 50;
+        screw1.scale(0.2);
+        
+        var screw2 = screw1.clone();
+        stage.addChild(screw2);
+        screw2.x = 1405;
+        screw2.y = 50;
+        screw2.scale(0.2);
+        
+        var screw3 = screw1.clone();
+        stage.addChild(screw3);
+        screw3.x = 475;
+        screw3.y = 985;
+        screw3.scale(0.2);
+        
+        var screw4 = screw1.clone();
+        stage.addChild(screw4);
+        screw4.x = 1405;
+        screw4.y = 985;
+        screw4.scale(0.2);
+
+        var tabs = new zim.Tabs({
+            tabs:["Vocal", "Snare", "Snap", "Pssk"], 
+            spacing: 30, 
+            corner: 15, 
+            flatBottom: false, 
+            width: 950,
+            height: 150,
+            currentEnabled: true, 
+            color: "#00BCD4", 
+            offColor: "#00BCD4", 
+            rollColor: "#FFE0B2",
+            gradient: 0.3,
+            gloss: 0.1,
+        });
+        tabs.on("change", playSound);
+        tabs.center(stage);
+
+        var tabs2 = new zim.Tabs({
+            tabs:["Bite 1", "Bite 2", "Bite 3", "Bite 4"], 
+            spacing: 30, 
+            corner: 15, 
+            flatBottom: false, 
+            width: 950,
+            height: 150,
+            currentEnabled: true, 
+            color: "#00BCD4", 
+            offColor: "#00BCD4", 
+            rollColor: "#FFE0B2",
+            gradient: 0.3,
+            gloss: 0.1,
+        });
+        tabs2.on("change", playSound2);    
+        stage.addChild(tabs2);
+        tabs2.x = stageW/2 - tabs2.width/2;
+        tabs2.y = tabs.y + 175;
+
+        var tabs3 = new zim.Tabs({
+            tabs:["Laser", "Whip", "Zip", "Hey"], 
+            spacing: 30, 
+            corner: 15, 
+            flatBottom: false, 
+            width: 950,
+            height: 150,
+            currentEnabled: true, 
+            color: "#00BCD4", 
+            offColor: "#00BCD4", 
+            rollColor: "#FFE0B2",
+            gradient: 0.3,
+            gloss: 0.1,
+        });
+        tabs3.on("change", playSound3);    
+        stage.addChild(tabs3);
+        tabs3.x = stageW/2 - tabs3.width/2;
+        tabs3.y = tabs2.y + 175;
+        
+        var mainTitle = new zim.Label({
+            text: "DJ Wasabi's Soundboard",
+            size: 50,
+            font: "Calibri",
+            color: "#FFFFFF",
+            shadowColor: "#DDDDDD",
+            shadowBlur: 24,
+        });
+        
+        stage.addChild(mainTitle);
+        mainTitle.x = stageW/2 - mainTitle.width/2;
+        mainTitle.y = tabs.y - 300;
+        
+        //min, max, step, button, barLength, barWidth, barColor, vertical, useTicks, inside
+        var slider = new zim.Slider({
+            min: 250,
+            max: 1500,
+            step: 5,
+            barColor:"#F57C00",
+            useTicks: true,
+        });
+        stage.addChild(slider);
+        slider.x = stageW/2 - slider.width/2;
+        slider.y = mainTitle.y + 175;
+        slider.on("change", function() {
+            zog(slider.currentValue); // 1-10 in steps of 1
+        });
+        
+        var speed = new zim.Label({
+            text: "Fast ↭ Slow",
+            size: 30,
+            font: "Calibri",
+            color: "#FFFFFF",
+            shadowColor: "#DDDDDD",
+            shadowBlur: 24,
+        });
+        stage.addChild(speed);
+        speed.x = stageW/2 - speed.width/2;
+        speed.y = slider.y + 20;
+        
+        var led = frame.asset("led.png");
+        stage.addChild(led);
+        led.width = 150;
+        led.x = slider.x + 400;
+        led.y = slider.y - 90;
+        
+        //width, height, label, color, rollColor, borderColor, borderThickness, corner, shadowColor, shadowBlur, hitPadding, gradient, gloss, flatBottom, backing, rollBacking, rollPersist, icon, rollIcon, toggle, rollToggle, toggleEvent
+        var recBut = new zim.Button({
+            width: 200,
+            height: 100,
+            color: "#00BCD4",
+            rollColor: "#FFE0B2",
+            corner: 24,
+            gradient: 0.3,
+            gloss: 0.1,
+            label: "Record",
+        });
+        stage.addChild(recBut);
+        recBut.x = slider.x - 250;
+        recBut.y = slider.y - recBut.height/2;
+
+        //////// OBJECT ARRAY FOR SOUNDS <-> TABS ////////
+        var sounds = {Vocal: "vocal.mp3", Snare: "snare.wav", "Bite 1": "bite.wav", "Bite 2": "bite2.wav", "Bite 3": "bite3.wav", "Bite 4": "bite4.wav", Laser: "laser.wav", Snap: "snap.wav", Pssk: "pssk.wav", Whip: "whip.wav", Zip: "scratch.wav", Hey: "hey.wav"}
+        
+        //////// FUNCTIONS TO RECORD AND CLEAR ////////
+        var recordON = false;
+        var recInt;
+        var playArray = [];
+        var check = 0;
+        var arrayKey;
+        
+        function recordSound() {
+            zog("recordsound", playArray);
+            //for (var i=0; i < playArray.length; i++) {
+                if (check >= playArray.length) {
+                    check = 0;
+                };
+                arrayKey = playArray[check];
+                //zog(arrayKey);
+                //zog(i);
+                if (playArray.length > 0) {
+                    frame.asset(sounds[arrayKey]).play();
+                };
+                check++;
+//                frame.asset(sounds[arrayKey]).paused = true;
+            //};
+            setTimeout(recordSound, slider.currentValue);
+        };
+        
+        
+        recBut.on("click", function(){
+            if (recordON == false) {
+                recBut.color = "red";
+                recBut.text = "Stop";
+                recordON = true;
+//                recInt = setInterval(recordSound, slider.currentValue);
+                recordSound();
+            } else {
+                recBut.color = "#00BCD4";
+                recBut.text = "Record";
+                recordON = false;
+                clearInterval(recInt);
+                playArray = [];
+            };  
+        });
+        
+//        var recInt2;
+//        while (recordON == true) {
+//            recInt2 = setTimeout(recordSound, slider.currentValue);
+//        };
+
+        //////// FUNCTION TO PLAY SOUNDS ////////
+        function playSound() {
+            frame.asset(sounds[tabs.text]).play();
+            if (recordON == true) {
+                playArray.push(tabs.text);
+            };
+        };
+        function playSound2() {
+            frame.asset(sounds[tabs2.text]).play();
+            if (recordON == true) {
+                playArray.push(tabs2.text);
+            };
+        };
+        function playSound3() {
+            frame.asset(sounds[tabs3.text]).play();
+            if (recordON == true) {
+                playArray.push(tabs3.text);
+            };
+        };
+
+        stage.update();
+    }); // end of complete
+
+	stage.update();
+}); // end of ready
+</script>
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
